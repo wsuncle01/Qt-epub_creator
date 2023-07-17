@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.image {
+  text-align: center;
+}
+
+.title{
+  background-color:#c0c4e7;
+  display: block;
+  font-size: 1.41667em;
+  font-family: verdana;
+  color:#424242 ;
+  padding: 45px 5px 5px;
+  border-right: #4352cb double 5px;
+  border-left: #4352cb solid 20px;
+}
+
