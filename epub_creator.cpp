@@ -169,11 +169,11 @@ void epub_creator::displayOutDir()
 
 void epub_creator::createSep()
 {
-    for(QString i:filelist){
+    for(int i=0;i<filelist.size();i++){
         QStringList f;
-        f.append(i);
+        f.append(filelist[i]);
         std::smatch results;
-        std::string str=i.toStdString();
+        std::string str=filelist[i].toStdString();
         std::string pattern = "/([^/]+).txt$";
         std::regex re(pattern);
         QString title;
