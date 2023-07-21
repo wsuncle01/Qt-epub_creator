@@ -18,6 +18,7 @@ private:
     QStringList contextList;
     QStringList fileNameList;
     QStringList filePathList;
+    QList<QStringList> file;
 
 public:
     Comic_generate();

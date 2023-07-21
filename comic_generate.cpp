@@ -62,10 +62,26 @@ void Comic_generate::setTocncx(QString ComicName)
 <meta name=\"dtb:totalPageCount\" content=\"0\"/>\
 <meta name=\"dtb:maxPageNumber\" content=\"0\"/></head><docTitle>\
 <text>%2</text></docTitle><navMap>").arg(Buuid,ComicName);
-    for(int i=0;i<ChapterNameList.size();i++){
-       QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
-       tocncx+=QString("<navPoint id=\"navPoint-%1\" playOrder=\"%1\"><navLabel><text>%2</text>\
-                             </navLabel><content src=\"Text/%3.xhtml\"/></navPoint>").arg(QString::number(i+1),ChapterNameList[i],Section);
+//    for(int i=0;i<ChapterNameList.size();i++){
+//       QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
+//       tocncx+=QString("<navPoint id=\"navPoint-%1\" playOrder=\"%1\"><navLabel><text>%2</text>\
+//                             </navLabel><content src=\"Text/%3.xhtml\"/></navPoint>").arg(QString::number(i+1),ChapterNameList[i],Section);
+//    }
+    int count=0;
+    for(int i=0;i<file.size();i++){
+        if(!file[i].empty()){
+            QString Ch=QString("%1").arg(ChapterNameList[i])+QString("_page%1").arg(0,8,10,QLatin1Char('0'));
+            tocncx+=QString("<navPoint id=\"navPoint-%1\" playOrder=\"%1\"><navLabel><text>%2</text>\
+                                  </navLabel><content src=\"Text/%3.xhtml\"/>").arg(QString::number(count+1),ChapterNameList[i],Ch);
+            count++;
+            for(int j=0;j<file[i].size();j++){
+                QString Section=QString("%1").arg(ChapterNameList[i])+QString("_page%1").arg(j,8,10,QLatin1Char('0'));
+                tocncx+=QString("<navPoint id=\"navPoint-%1\" playOrder=\"%1\"><navLabel><text>%2</text>\
+                                      </navLabel><content src=\"Text/%3.xhtml\"/></navPoint>").arg(QString::number(count+1),QString::number(j+1),Section);
+                count++;
+            }
+            tocncx+="</navPoint>";
+        }
     }
     tocncx+=QString("</navMap></ncx>");
     Toc_Ncx=tocncx;
@@ -78,19 +94,19 @@ void Comic_generate::getContext(QList<chapterNode> filePath, QStringList picList
 {
     for(int i=0;i<filePath.size();i++){
         ChapterNameList.append(filePath[i].chapterName);
-        QString context="";
-        context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
-EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
-<head><title>";
-        context+=filePath[i].chapterName;
-        context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
-        context+="</title></head><body><div class=\"image\">";
+        QStringList CList;
         for(int j=0;j<filePath[i].dataList.size();j++){
             std::smatch results;
             std::string str=filePath[i].dataList[j].toStdString();
             std::string pattern = "/([^/]+)$";
             std::regex re(pattern);
-            QString title;
+            QString context="";
+            context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
+                      EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
+                      <head><title>";
+                      context+=filePath[i].chapterName;
+            context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
+            context+="</title></head><body><div class=\"image\">";
             if(std::regex_search(str, results, re)){
                 QString name;
                 name=QString::fromStdString(results[1].str());
@@ -98,24 +114,25 @@ EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://ww
                 filePathList.append(filePath[i].dataList[j]);
                 context+="<img alt=\""+name.split(".")[0]+"\" src=\"../Images/"+name+"\"/>";
             }
+            context+="</div></body></html>";
+            CList.append(context);
         }
-        context+="</div></body></html>";
-        contextList.append(context);
+        file.append(CList);
     }
-    ChapterNameList.append("Unnamed Chapter");
-    QString context="";
-    context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
-               EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
-               <head><title>";
-    context+="Unnamed Chapter";
-    context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
-    context+="</title></head><body><div class=\"image\">";
+    ChapterNameList.append("Unnamed_Chapter");
+    QStringList CList;
     for(int i=0;i<picList.size();i++){
         std::smatch results;
         std::string str=picList[i].toStdString();
         std::string pattern = "/([^/]+)$";
         std::regex re(pattern);
-        QString title;
+        QString context="";
+        context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
+EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
+<head><title>";
+        context+="Unnamed Chapter";
+        context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
+        context+="</title></head><body><div class=\"image\">";
         if(std::regex_search(str, results, re)){
             QString name;
             name=QString::fromStdString(results[1].str());
@@ -123,22 +140,61 @@ EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://ww
             filePathList.append(picList[i]);
             context+="<img alt=\""+name.split(".")[0]+"\" src=\"../Images/"+name+"\"/>";
         }
+        context+="</div></body></html>";
+        CList.append(context);
     }
-    context+="</div></body></html>";
-    contextList.append(context);
-//    QFile file("C:/Users/黄辙/Desktop/1111/eeee.txt");
-//    if (!file.open(QIODevice::WriteOnly|QIODevice::Append)) {
-//        qDebug() << "Cannot open file for writing: "
-//                 << qPrintable(file.errorString());
-//        return;
+    file.append(CList);
+
+//    for(int i=0;i<filePath.size();i++){
+//        ChapterNameList.append(filePath[i].chapterName);
+//        QString context="";
+//        context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
+//EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
+//<head><title>";
+//        context+=filePath[i].chapterName;
+//        context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
+//        context+="</title></head><body><div class=\"image\">";
+//        for(int j=0;j<filePath[i].dataList.size();j++){
+//            std::smatch results;
+//            std::string str=filePath[i].dataList[j].toStdString();
+//            std::string pattern = "/([^/]+)$";
+//            std::regex re(pattern);
+//            QString title;
+//            if(std::regex_search(str, results, re)){
+//                QString name;
+//                name=QString::fromStdString(results[1].str());
+//                fileNameList.append(name);
+//                filePathList.append(filePath[i].dataList[j]);
+//                context+="<img alt=\""+name.split(".")[0]+"\" src=\"../Images/"+name+"\"/>";
+//            }
+//        }
+//        context+="</div></body></html>";
+//        contextList.append(context);
 //    }
-//    QByteArray outfileData;
-//    QDataStream out(&file);
-//    for(int i=0;i<contextList.size();i++){
-//        QByteArray outfileData=QByteArray::fromRawData(contextList[i].toUtf8(),contextList[i].toUtf8().size());
-//        out.writeRawData(outfileData,outfileData.end()-outfileData.begin());
+//    ChapterNameList.append("Unnamed Chapter");
+//    QString context="";
+//    context+="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//\
+//               EN\"\n\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\
+//               <head><title>";
+//    context+="Unnamed Chapter";
+//    context+="<link href=\"../Styles/Style0001.css\" type=\"text/css\" rel=\"stylesheet\"/>";
+//    context+="</title></head><body><div class=\"image\">";
+//    for(int i=0;i<picList.size();i++){
+//        std::smatch results;
+//        std::string str=picList[i].toStdString();
+//        std::string pattern = "/([^/]+)$";
+//        std::regex re(pattern);
+//        QString title;
+//        if(std::regex_search(str, results, re)){
+//            QString name;
+//            name=QString::fromStdString(results[1].str());
+//            fileNameList.append(name);
+//            filePathList.append(picList[i]);
+//            context+="<img alt=\""+name.split(".")[0]+"\" src=\"../Images/"+name+"\"/>";
+//        }
 //    }
-    //    file.close();
+//    context+="</div></body></html>";
+//    contextList.append(context);
 }
 
 void Comic_generate::setContentopf(QString author, QString ComicName)
@@ -154,17 +210,21 @@ void Comic_generate::setContentopf(QString author, QString ComicName)
 <dc:date opf:event=\"modification\" xmlns:opf=\"http://www.idpf.org/2007/opf\">%1</dc:date>\
 <dc:identifier id=\"BookId\" opf:scheme=\"UUID\">urn:uuid:%2</dc:identifier>\
 </metadata><manifest><item id=\"ncx\" href=\"toc.ncx\" media-type=\"application/x-dtbncx+xml\"/>").arg(date,Buuid);
-    for(int i=0;i<ChapterNameList.size();i++){
-        QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
-        contentopf+=QString("<item id=\"x%1.xhtml\" href=\"Text/%1.xhtml\" media-type=\"application/xhtml+xml\"/>").arg(Section);
+    for(int i=0;i<file.size();i++){
+        for(int j=0;j<file[i].size();j++){
+            QString Section=QString("%1").arg(ChapterNameList[i])+QString("_page%1").arg(j,8,10,QLatin1Char('0'));
+            contentopf+=QString("<item id=\"x%1.xhtml\" href=\"Text/%1.xhtml\" media-type=\"application/xhtml+xml\"/>").arg(Section);
+        }
     }
     for(int i=0;i<fileNameList.size();i++){
         contentopf+=QString("<item id=\"x%1\" href=\"Images/%1\" media-type=\"image/png\"/>").arg(fileNameList[i]);
     }
     contentopf+=QString("<item id=\"Style0001.css\" href=\"Styles/Style0001.css\" media-type=\"text/css\"/></manifest><spine toc=\"ncx\">");
-    for(int i=0;i<ChapterNameList.size();i++){
-        QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
-        contentopf+=QString("<itemref idref=\"x%1.xhtml\"/>").arg(Section);
+    for(int i=0;i<file.size();i++){
+        for(int j=0;j<file[i].size();j++){
+            QString Section=QString("%1").arg(ChapterNameList[i])+QString("_page%1").arg(j,8,10,QLatin1Char('0'));
+            contentopf+=QString("<itemref idref=\"x%1.xhtml\"/>").arg(Section);
+        }
     }
 //    for(int i=0;i<fileNameList.size();i++){
 //        contentopf+=QString("<itemref idref=\"x%1\"/>").arg(fileNameList[i]);
@@ -192,12 +252,18 @@ void Comic_generate::reNameSameChapterTitle()
 
 void Comic_generate::generate(QList<chapterNode> filePath, QStringList picList, QString author, QString ComicName, QString outDir)
 {
+//    qDebug()<<1;
     getContext(filePath,picList);
+//    qDebug()<<1;
     reNameSameChapterTitle();
+//    qDebug()<<1;
     setDate();
     setUuid();
+//    qDebug()<<1;
     setContentopf(author,ComicName);
+//    qDebug()<<1;
     setTocncx(ComicName);
+//    qDebug()<<1;
     LoadSrc();
     Zip Z2Epub;
     Z2Epub.addfile("META-INF/container.xml",containerXML);//这行代码必须在添加时放在第一个
@@ -205,9 +271,15 @@ void Comic_generate::generate(QList<chapterNode> filePath, QStringList picList, 
     Z2Epub.addfile("OEBPS/Styles/Style0001.css",cssFile);
     Z2Epub.addfile("OEBPS/content.opf",Content_Opf);
     Z2Epub.addfile("OEBPS/toc.ncx",Toc_Ncx);
-    for(int i=0;i<ChapterNameList.size();i++){
-        QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
-        Z2Epub.addfile("OEBPS/Text/"+Section+".xhtml",contextList[i]);
+//    for(int i=0;i<ChapterNameList.size();i++){
+//        QString Section=QString("Section%1").arg(i,8,10,QLatin1Char('0'));
+//        Z2Epub.addfile("OEBPS/Text/"+Section+".xhtml",contextList[i]);
+//    }
+    for(int i=0;i<file.size();i++){
+        for(int j=0;j<file[i].size();j++){
+            QString Section=QString("%1").arg(ChapterNameList[i])+QString("_page%1").arg(j,8,10,QLatin1Char('0'));
+            Z2Epub.addfile("OEBPS/Text/"+Section+".xhtml",file[i][j]);
+        }
     }
     for(int i=0;i<filePathList.size();i++){
         QImage image(filePathList[i]);
