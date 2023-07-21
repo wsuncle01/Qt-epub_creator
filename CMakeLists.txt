@@ -46,6 +46,8 @@ else()
             source/container.xml source/mimetype source/Style0001.css
             tree.h tree.cpp
             zip.h zip.cpp
+            comic_creator.h comic_creator.cpp comic_creator.ui
+            comic_generate.h comic_generate.cpp
 
 
         )

@@ -80,6 +80,7 @@ public:
     void addBrotherNode(TreeNode* bro, TreeNode* node);
     void preOrder(TreeNode* parent,QString path);//前序遍历
     void addFile(QStringList filePath,QString data);
+    void addFile(QStringList filePath,QByteArray data);
     void addDir(QStringList filePath);
     void print();
     void printFile(TreeNode* node, int num);

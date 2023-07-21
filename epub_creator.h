@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QFrame>
+#include <QComboBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class epub_creator; }
@@ -18,10 +19,12 @@ private:
     QString authorQString;
     QString BnameQString;
     QString outputDir;
+    QStringList mods;
     //text
 public:
     epub_creator(QWidget *parent = nullptr);
     ~epub_creator();
+public:
     void addfile();//添加文件到filelist中并显示到fileview中
     void deletefile();//删除fileview中选中的行
     void up();//使得fileview中光标选中的行向上移动
@@ -33,6 +36,8 @@ public:
     void setOutput();//设置输出目录
     void displayOutDir();//显示输出目录
     void createSep();
+public slots:
+    void ChangeMod();
     //ui
 private:
     Ui::epub_creator *ui;

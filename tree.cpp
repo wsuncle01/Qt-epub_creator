@@ -48,10 +48,68 @@ QByteArray calcFileCRC(QString file)
     return crc;
 }
 
+QByteArray calcFileCRC(QByteArray file)
+{
+    if(file==""){
+        QByteArray zerocrc;
+        zerocrc.resize(4);
+        zerocrc[0]='\x00';
+        zerocrc[1]='\x00';
+        zerocrc[2]='\x00';
+        zerocrc[3]='\x00';
+        return zerocrc;
+    }
+
+
+    quint32 crc32 = 0xffffffffL;
+
+    //    QByteArray bfile=file.toLocal8Bit();
+    QByteArray bfile=file;
+    //    qDebug()<<test<<test.size();
+    //    QFile file(fileName);
+    //    bool result = file.open(QFile::ReadOnly);
+    //    if(result) {
+    //        while(!file.atEnd()) {
+    //            QByteArray data = file.read(1024*1024);
+    //            for (auto i = 0; i < data.size(); ++i ) {
+    //                crc32 = crc32Table[ ( crc32 ^ data.constData()[ i ]) & 0xff ] ^ ( crc32 >> 8 );
+    //            }
+    //        }
+    //        crc32 = crc32 ^ 0xffffffffL;
+
+    //        file.close();
+    //    }
+    for (auto i = 0; i < bfile.size(); ++i ) {
+        crc32 = crc32Table[ ( crc32 ^ bfile.constData()[ i ]) & 0xff ] ^ ( crc32 >> 8 );
+    }
+    crc32 = crc32 ^ 0xffffffffL;
+    //qDebug()<<QString::number(crc32,16);
+    QByteArray crc;
+    crc.resize(4);
+    crc[0]=(crc32&0x000000ff);
+    crc[1]=(crc32&0x0000ff00)>>8;
+    crc[2]=(crc32&0x00ff0000)>>16;
+    crc[3]=(crc32&0xff000000)>>24;
+    return crc;
+}
+
 QByteArray fsize(QString file)
 {
     unsigned int length;
     length = file.toUtf8().size();
+    QByteArray len;
+    len.resize(4);
+    len[0]=(length&0x000000ff);
+    len[1]=(length&0x0000ff00)>>8;
+    len[2]=(length&0x00ff0000)>>16;
+    len[3]=(length&0xff000000)>>24;
+    return len;
+}
+
+QByteArray fsize(QByteArray file)
+{
+    unsigned int length;
+    length = file.size();
     QByteArray len;
     len.resize(4);
     len[0]=(length&0x000000ff);
@@ -161,7 +219,6 @@ void Tree::addFile(QStringList filePath, QString data)
     TreeNode *newFile=new TreeNode;
     newFile->fileName=filePath[len].toUtf8();
     newFile->crc=calcFileCRC(data);
-    newFile->crc=calcFileCRC(data);
     newFile->datasize=fsize(data);
     newFile->data=data.toUtf8();
     newFile->isDir=false;
@@ -169,6 +226,67 @@ void Tree::addFile(QStringList filePath, QString data)
     newFile->nextSibling=nullptr;
     addNode(Parent,newFile);
 
+}
+
+void Tree::addFile(QStringList filePath, QByteArray data)
+{
+    QByteArray ZeroByteZero;
+    ZeroByteZero.resize(0);
+    QByteArray TwoByteZero;
+    TwoByteZero.resize(2);
+    TwoByteZero[0]='\x00';
+    TwoByteZero[1]='\x00';
+    QByteArray FourByteZero;
+    FourByteZero.resize(4);
+    FourByteZero[0]='\x00';
+    FourByteZero[1]='\x00';
+    FourByteZero[2]='\x00';
+    FourByteZero[3]='\x00';
+    TreeNode *Parent=root;
+    TreeNode *cur;
+    int len=filePath.size()-1;
+    //qDebug()<<len;
+    for(int i=0;i<len;i++){
+        cur=Parent->firstChild;
+        bool found=false;
+        while(cur!=nullptr){
+            if(cur->fileName==filePath[i]){
+                found=true;
+                break;
+            }
+            cur=cur->nextSibling;
+        }
+        if(found){
+            if(cur->isDir){
+                Parent=cur;
+            }
+            else{
+                qDebug()<<"[Tree]Error:Path error";
+                return;
+            }
+        }
+        else{
+            TreeNode *newDir=new TreeNode;
+            newDir->fileName=filePath[i].toUtf8();
+            newDir->data=ZeroByteZero;
+            newDir->crc=FourByteZero;
+            newDir->datasize=FourByteZero;
+            newDir->isDir=true;
+            newDir->firstChild=nullptr;
+            newDir->nextSibling=nullptr;
+            addNode(Parent,newDir);
+            Parent=newDir;
+        }
+    }
+    TreeNode *newFile=new TreeNode;
+    newFile->fileName=filePath[len].toUtf8();
+    newFile->crc=calcFileCRC(data);
+    newFile->datasize=fsize(data);
+    newFile->data=data;
+    newFile->isDir=false;
+    newFile->firstChild=nullptr;
+    newFile->nextSibling=nullptr;
+    addNode(Parent,newFile);
 }
 
 void Tree::addDir(QStringList filePath)

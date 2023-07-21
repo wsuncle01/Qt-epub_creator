@@ -11,6 +11,7 @@
 #include <QUuid>
 #include <QDateTime>
 #include "zip.h"
+
 //#include <QLatin1Char>
 
 EpubGenerate::EpubGenerate()

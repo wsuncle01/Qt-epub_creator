@@ -29,7 +29,26 @@
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QListWidget" name="fileView"/>
+         <widget class="QSplitter" name="view_and_modSp">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QListWidget" name="fileView"/>
+          <widget class="QSplitter" name="modSp">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>模式</string>
+            </property>
+            <property name="buddy">
+             <cstring>ModSelection</cstring>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="ModSelection"/>
+          </widget>
+         </widget>
          <widget class="QSplitter" name="ctrlUnit">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -40,7 +59,7 @@
            </property>
            <widget class="QLabel" name="Author">
             <property name="text">
-             <string>Author</string>
+             <string>作者</string>
             </property>
             <property name="buddy">
              <cstring>editAuthor</cstring>
@@ -54,7 +73,7 @@
            </property>
            <widget class="QLabel" name="Bname">
             <property name="text">
-             <string>Book Name</string>
+             <string>书名</string>
             </property>
             <property name="buddy">
              <cstring>editBname</cstring>
@@ -78,7 +97,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Up</string>
+              <string>↑</string>
              </property>
             </widget>
             <widget class="QPushButton" name="Down">
@@ -89,7 +108,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Down</string>
+              <string>↓</string>
              </property>
             </widget>
            </widget>
@@ -105,7 +124,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Addfile</string>
+              <string>添加文件</string>
              </property>
             </widget>
             <widget class="QPushButton" name="deleteFile">
@@ -116,24 +135,24 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Deletefile</string>
+              <string>删除文件</string>
              </property>
             </widget>
            </widget>
           </widget>
           <widget class="QPushButton" name="Clear">
            <property name="text">
-            <string>Clear</string>
+            <string>清空</string>
            </property>
           </widget>
           <widget class="QPushButton" name="CreateSep">
            <property name="text">
-            <string>Create separately</string>
+            <string>分别生成</string>
            </property>
           </widget>
           <widget class="QPushButton" name="CreateAsOne">
            <property name="text">
-            <string>Create as one book</string>
+            <string>合并生成</string>
            </property>
           </widget>
           <widget class="QSplitter" name="outputSp">
@@ -147,7 +166,7 @@
            </widget>
            <widget class="QPushButton" name="setOutput">
             <property name="text">
-             <string>output dir</string>
+             <string>输出文件夹</string>
             </property>
            </widget>
           </widget>

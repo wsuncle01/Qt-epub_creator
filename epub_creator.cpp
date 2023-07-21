@@ -4,6 +4,8 @@
 #include <QFile>
 #include "epubgenerate.h"
 #include <regex>
+#include <QComboBox>
+#include "comic_creator.h"
 
 epub_creator::epub_creator(QWidget *parent)
     : QMainWindow(parent)
@@ -18,7 +20,12 @@ epub_creator::epub_creator(QWidget *parent)
     BnameQString="untitled";
     ui->editAuthor->setPlaceholderText(authorQString);
     ui->editBname->setPlaceholderText(BnameQString);
+    mods<<"PureTextBook"<<"Comic";
+    ui->ModSelection->addItems(mods);
+    ui->ModSelection->setCurrentIndex(0);
     displayOutDir();
+    ui->editAuthor->setClearButtonEnabled(true);
+    ui->editBname->setClearButtonEnabled(true);
     //qDebug()<<outputDir;
     connect(ui->Addfile,&QPushButton::clicked,this,&epub_creator::addfile);//添加文件
     connect(ui->deleteFile,&QPushButton::clicked,this,&epub_creator::deletefile);//删除光标选中的文件
@@ -30,6 +37,7 @@ epub_creator::epub_creator(QWidget *parent)
     connect(ui->CreateAsOne,&QPushButton::clicked,this,&epub_creator::createAsOne);//创建一本书
     connect(ui->setOutput,&QPushButton::clicked,this,&epub_creator::setOutput);//获得输出目录
     connect(ui->CreateSep,&QPushButton::clicked,this,&epub_creator::createSep);
+    connect(ui->ModSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeMod()));
 }
 
 epub_creator::~epub_creator()
@@ -43,7 +51,7 @@ void epub_creator::addfile()
     QStringList fileNames = QFileDialog::getOpenFileNames(
         this,
         "选择文件",
-        "D:/",
+        "C:/",
         "文档(*.txt)");
     if (!fileNames.isEmpty()) {
         for(QString i:fileNames){
@@ -169,6 +177,8 @@ void epub_creator::displayOutDir()
 
 void epub_creator::createSep()
 {
+    QStringList authorName;
+    authorName=authorQString.split(';');
     for(int i=0;i<filelist.size();i++){
         QStringList f;
         f.append(filelist[i]);
@@ -181,8 +191,23 @@ void epub_creator::createSep()
             title=QString::fromStdString(results[1].str());
         }
         EpubGenerate *Book=new EpubGenerate;
-        Book->generate("",title,f,outputDir);
+        QString Name="unknown";
+        if(i<authorName.size()&&authorName[i]!="unknown"){
+            Name=authorName[i];
+        }
+        Book->generate("unknown",title,f,outputDir);
         delete Book;
+    }
+}
+
+void epub_creator::ChangeMod()
+{
+//    qDebug()<<ui->ModSelection->currentIndex();
+    int curIndex=ui->ModSelection->currentIndex();
+    if(curIndex==1){
+        this->close();
+        Comic_Creator *c=new Comic_Creator;
+        c->show();
     }
 }
 

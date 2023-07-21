@@ -14,6 +14,7 @@ public:
     QByteArray getcrc32(QString data);
     QByteArray getlength(QString data);
     void addfile(QString path,QString data);
+    void addfile(QString path, QByteArray data);
 };
 
 #endif // ZIP_H

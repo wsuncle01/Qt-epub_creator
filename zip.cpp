@@ -52,5 +52,12 @@ void Zip::addfile(QString path, QString data)
     ziptree.addFile(filepath,data);
 }
 
+void Zip::addfile(QString path, QByteArray data)
+{
+    QStringList filepath;
+    filepath=path.split('/');
+    ziptree.addFile(filepath,data);
+}
+
 
 
